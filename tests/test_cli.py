@@ -1,19 +1,7 @@
-"""
-Unit tests for the CLI interface (cli/main.py).
-
-All HTTP requests and user inputs are mocked so the Flask server does
-not need to be running.
-"""
 import pytest
-import requests as requests_lib
 from unittest.mock import patch, Mock
 
 import cli.main as cli
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Helpers
-# ─────────────────────────────────────────────────────────────────────────────
 
 MOCK_ITEMS = [
     {
@@ -25,8 +13,7 @@ MOCK_ITEMS = [
         "price": 4.99,
         "barcode": "12345",
         "ingredients_text": "water, almonds",
-        "nutriments": {"energy_kcal": 30, "proteins": 1, "fat": 2.5, "carbohydrates": 1,
-                       "fiber": 0, "sugars": 0},
+        "nutriments": {"energy_kcal": 30, "proteins": 1, "fat": 2.5, "carbohydrates": 1, "fiber": 0, "sugars": 0},
         "image_url": "",
     },
     {
@@ -38,11 +25,11 @@ MOCK_ITEMS = [
         "price": 5.99,
         "barcode": "67890",
         "ingredients_text": "100% OJ",
-        "nutriments": {"energy_kcal": 110, "proteins": 2, "fat": 0, "carbohydrates": 26,
-                       "fiber": 0, "sugars": 22},
+        "nutriments": {"energy_kcal": 110, "proteins": 2, "fat": 0, "carbohydrates": 26, "fiber": 0, "sugars": 22},
         "image_url": "",
     },
 ]
+
 MOCK_ITEM = MOCK_ITEMS[0]
 
 API_PRODUCT = {
@@ -56,10 +43,7 @@ API_PRODUCT = {
 }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# view_all_inventory
-# ─────────────────────────────────────────────────────────────────────────────
-
+# tests for view_all_inventory
 class TestViewAllInventory:
     def test_displays_product_names(self, capsys):
         with patch("cli.main.api_get", return_value=(MOCK_ITEMS, 200)):
@@ -84,10 +68,7 @@ class TestViewAllInventory:
         assert "error" in capsys.readouterr().out.lower()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# view_single_item
-# ─────────────────────────────────────────────────────────────────────────────
-
+# tests for view_single_item
 class TestViewSingleItem:
     def test_displays_item_details(self, capsys):
         with patch("cli.main.api_get", return_value=(MOCK_ITEM, 200)), \
@@ -108,16 +89,12 @@ class TestViewSingleItem:
         assert "error" in out.lower() or "not found" in out.lower()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# add_item_manually
-# ─────────────────────────────────────────────────────────────────────────────
-
+# tests for add_item_manually
 class TestAddItemManually:
     _good_inputs = ["Test Product", "Test Brand", "123", "Foods", "water", "10", "5.99"]
 
     def test_successful_add_prints_confirmation(self, capsys):
-        added = {**MOCK_ITEM, "id": 6, "product_name": "Test Product",
-                 "quantity": 10, "price": 5.99}
+        added = {**MOCK_ITEM, "id": 6, "product_name": "Test Product", "quantity": 10, "price": 5.99}
         with patch("builtins.input", side_effect=self._good_inputs), \
              patch("cli.main.api_post", return_value=(added, 201)):
             cli.add_item_manually()
@@ -144,10 +121,7 @@ class TestAddItemManually:
         assert "error" in capsys.readouterr().out.lower()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# update_item
-# ─────────────────────────────────────────────────────────────────────────────
-
+# tests for update_item
 class TestUpdateItem:
     def test_successful_update_prints_confirmation(self, capsys):
         updated = {**MOCK_ITEM, "quantity": 99, "price": 9.99}
@@ -176,10 +150,7 @@ class TestUpdateItem:
         assert "error" in capsys.readouterr().out.lower()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# delete_item
-# ─────────────────────────────────────────────────────────────────────────────
-
+# tests for delete_item
 class TestDeleteItem:
     def test_successful_delete_prints_confirmation(self, capsys):
         with patch("cli.main.api_get", return_value=(MOCK_ITEM, 200)), \
@@ -207,15 +178,11 @@ class TestDeleteItem:
         assert "error" in capsys.readouterr().out.lower()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# search_and_add_from_api
-# ─────────────────────────────────────────────────────────────────────────────
-
+# tests for search_and_add_from_api
 class TestSearchAndAddFromApi:
     def test_barcode_search_displays_product(self, capsys):
         with patch("cli.main.api_get", return_value=(API_PRODUCT, 200)), \
-             patch("cli.main.api_post", return_value=({**API_PRODUCT, "id": 10,
-                                                        "quantity": 5, "price": 2.99}, 201)), \
+             patch("cli.main.api_post", return_value=({**API_PRODUCT, "id": 10, "quantity": 5, "price": 2.99}, 201)), \
              patch("builtins.input", side_effect=["1", "9876543210", "yes", "5", "2.99"]):
             cli.search_and_add_from_api()
         assert "Found Product" in capsys.readouterr().out

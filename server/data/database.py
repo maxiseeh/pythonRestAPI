@@ -1,19 +1,14 @@
-"""
-In-memory mock database for the inventory management system.
-Data structure mirrors the OpenFoodFacts API response format.
-"""
 import copy
 
-_INITIAL_INVENTORY = [
+# This is our fake database stored in memory as a list
+# Each item has an id and product info similar to OpenFoodFacts
+inventory = [
     {
         "id": 1,
         "product_name": "Organic Almond Milk",
         "brands": "Silk",
         "barcode": "025293003628",
-        "ingredients_text": (
-            "Filtered water, almonds, cane sugar, sea salt, "
-            "sunflower lecithin, locust bean gum, gellan gum"
-        ),
+        "ingredients_text": "Filtered water, almonds, cane sugar, sea salt, sunflower lecithin, locust bean gum, gellan gum",
         "category": "Plant-based milks",
         "quantity": 50,
         "price": 4.99,
@@ -23,18 +18,16 @@ _INITIAL_INVENTORY = [
             "fat": 2.5,
             "carbohydrates": 1.0,
             "fiber": 0.0,
-            "sugars": 0.0,
+            "sugars": 0.0
         },
-        "image_url": "",
+        "image_url": ""
     },
     {
         "id": 2,
         "product_name": "Whole Grain Bread",
         "brands": "Nature's Own",
         "barcode": "040000487579",
-        "ingredients_text": (
-            "Whole grain wheat flour, water, yeast, sugar, salt, soybean oil"
-        ),
+        "ingredients_text": "Whole grain wheat flour, water, yeast, sugar, salt, soybean oil",
         "category": "Breads",
         "quantity": 30,
         "price": 3.49,
@@ -44,19 +37,16 @@ _INITIAL_INVENTORY = [
             "fat": 1.0,
             "carbohydrates": 13.0,
             "fiber": 2.0,
-            "sugars": 2.0,
+            "sugars": 2.0
         },
-        "image_url": "",
+        "image_url": ""
     },
     {
         "id": 3,
         "product_name": "Greek Yogurt",
         "brands": "Chobani",
         "barcode": "818290011242",
-        "ingredients_text": (
-            "Cultured nonfat milk, cane sugar, water, fruit pectin, "
-            "locust bean gum, natural flavors"
-        ),
+        "ingredients_text": "Cultured nonfat milk, cane sugar, water, fruit pectin, locust bean gum, natural flavors",
         "category": "Dairy",
         "quantity": 45,
         "price": 1.79,
@@ -66,9 +56,9 @@ _INITIAL_INVENTORY = [
             "fat": 0.0,
             "carbohydrates": 10.0,
             "fiber": 0.0,
-            "sugars": 9.0,
+            "sugars": 9.0
         },
-        "image_url": "",
+        "image_url": ""
     },
     {
         "id": 4,
@@ -85,9 +75,9 @@ _INITIAL_INVENTORY = [
             "fat": 0.0,
             "carbohydrates": 26.0,
             "fiber": 0.0,
-            "sugars": 22.0,
+            "sugars": 22.0
         },
-        "image_url": "",
+        "image_url": ""
     },
     {
         "id": 5,
@@ -104,28 +94,28 @@ _INITIAL_INVENTORY = [
             "fat": 0.0,
             "carbohydrates": 0.0,
             "fiber": 0.0,
-            "sugars": 0.0,
+            "sugars": 0.0
         },
-        "image_url": "",
-    },
+        "image_url": ""
+    }
 ]
 
-# Live inventory list — mutated by CRUD operations
-inventory = copy.deepcopy(_INITIAL_INVENTORY)
+# keep a copy of the original data so we can reset during tests
+_original_inventory = copy.deepcopy(inventory)
 
-# Auto-incrementing ID counter
-_id_counter = {"value": len(_INITIAL_INVENTORY) + 1}
+# track the next id to use
+next_id = len(inventory) + 1
 
 
 def get_next_id():
-    """Return the next available unique ID and increment the counter."""
-    current = _id_counter["value"]
-    _id_counter["value"] += 1
-    return current
+    global next_id
+    id_to_use = next_id
+    next_id += 1
+    return id_to_use
 
 
 def reset_database():
-    """Reset inventory to the initial seed data. Intended for use in tests."""
+    global next_id
     inventory.clear()
-    inventory.extend(copy.deepcopy(_INITIAL_INVENTORY))
-    _id_counter["value"] = len(_INITIAL_INVENTORY) + 1
+    inventory.extend(copy.deepcopy(_original_inventory))
+    next_id = len(_original_inventory) + 1

@@ -1,16 +1,8 @@
-"""
-Unit tests for inventory CRUD API endpoints.
-
-Covers: GET all, GET single, POST, PATCH, DELETE.
-"""
 import json
 import pytest
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# GET /inventory
-# ─────────────────────────────────────────────────────────────────────────────
-
+# tests for GET /inventory
 class TestGetAllInventory:
     def test_returns_200(self, client):
         response = client.get("/inventory")
@@ -28,17 +20,14 @@ class TestGetAllInventory:
         data = json.loads(client.get("/inventory").data)
         for item in data:
             for field in ("id", "product_name", "quantity", "price"):
-                assert field in item, f"Field '{field}' missing from item"
+                assert field in item
 
     def test_trailing_slash_also_works(self, client):
         response = client.get("/inventory/")
         assert response.status_code == 200
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# GET /inventory/<id>
-# ─────────────────────────────────────────────────────────────────────────────
-
+# tests for GET /inventory/<id>
 class TestGetSingleItem:
     def test_returns_200_for_existing_item(self, client):
         assert client.get("/inventory/1").status_code == 200
@@ -56,14 +45,10 @@ class TestGetSingleItem:
         assert "error" in data
 
     def test_returns_404_for_non_integer_id(self, client):
-        # Flask itself returns 404 when the converter type doesn't match
         assert client.get("/inventory/abc").status_code == 404
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# POST /inventory
-# ─────────────────────────────────────────────────────────────────────────────
-
+# tests for POST /inventory
 class TestAddInventoryItem:
     _valid_payload = {"product_name": "Test Product", "quantity": 10, "price": 2.99}
 
@@ -120,10 +105,7 @@ class TestAddInventoryItem:
         assert data.get("barcode") == ""
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PATCH /inventory/<id>
-# ─────────────────────────────────────────────────────────────────────────────
-
+# tests for PATCH /inventory/<id>
 class TestUpdateInventoryItem:
     def test_returns_200_on_success(self, client):
         assert client.patch("/inventory/1", json={"quantity": 99}).status_code == 200
@@ -162,10 +144,7 @@ class TestUpdateInventoryItem:
         assert client.patch("/inventory/1", json={"price": -1.0}).status_code == 400
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# DELETE /inventory/<id>
-# ─────────────────────────────────────────────────────────────────────────────
-
+# tests for DELETE /inventory/<id>
 class TestDeleteInventoryItem:
     def test_returns_200_on_success(self, client):
         assert client.delete("/inventory/1").status_code == 200
